@@ -13,27 +13,28 @@ Secret Manager secrets from a map with optional initial versions, CMEK and acces
 - Secret values are stored in Terraform state (plain `secret_data`, for the Terraform 1.5 floor). Protect the state backend, or leave `value` null and add versions out of band.
 - `kms_key_name` enables customer-managed encryption on every secret; with user-managed replication the key must be usable in every replica location.
 - `secrets` is sensitive; only its keys, locations and members are un-sensitised to drive `for_each`. `version_names` is sensitive.
+- `context.extra_tags` keys and values are normalised to valid GCP label syntax (lowercase, `[^a-z0-9_-]` → `-`, 63 chars); `labels` are applied verbatim and win.
 
 ## Usage
 
 ```hcl
-module "this" {
-  source = "git::https://github.com/Olensys/terraform-google-secret-manager.git?ref=v1.0.0"
+module "naming" {
+  source  = "git::https://github.com/Olensys/terraform-null-naming.git?ref=v1.0.1"
+  context = var.context
+}
 
-  name       = "app"
+module "this" {
+  source = "git::https://github.com/Olensys/terraform-google-secret-manager.git?ref=v1.1.0"
+
+  name       = module.naming.name
   project_id = "my-project"
-  context = {
-    organization = "olensys"
-    environment  = "dev"
-    application  = "example"
-    owner        = "platform"
-    cost_center  = "eng"
-  }
+  context = var.context
 
   secrets = {
     db_password = { value = var.db_password, accessor_members = ["serviceAccount:api@my-project.iam.gserviceaccount.com"] }
     api_key     = { create_version = false }
   }
+  labels  = module.naming.labels
 }
 ```
 
