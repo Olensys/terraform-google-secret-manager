@@ -12,7 +12,7 @@ variables {
   project_id = "example-project"
   secrets = {
     db  = { value = "s3cret" }
-    api = {}
+    api = { create_version = false }
   }
 }
 
@@ -56,6 +56,7 @@ run "test_accessor_iam" {
     secrets = {
       db = { value = "x", accessor_members = ["serviceAccount:a@example-project.iam.gserviceaccount.com", "group:b@example.com"] }
       api = {
+        create_version   = false
         accessor_members = ["group:b@example.com"]
       }
     }
@@ -93,6 +94,48 @@ run "test_replication_user_managed_when_locations" {
   assert {
     condition     = length(google_secret_manager_secret.this["db"].replication[0].auto) == 0 && length(google_secret_manager_secret.this["db"].replication[0].user_managed[0].replicas) == 2
     error_message = "One replica per location with user-managed replication."
+  }
+}
+
+run "test_replication_empty_list_is_automatic" {
+  command = plan
+
+  variables {
+    secrets = {
+      db = { value = "x", replication_locations = [] }
+    }
+  }
+
+  assert {
+    condition     = length(google_secret_manager_secret.this["db"].replication[0].auto) == 1 && length(google_secret_manager_secret.this["db"].replication[0].user_managed) == 0
+    error_message = "An empty replication_locations list must mean automatic replication."
+  }
+}
+
+run "test_version_requires_value" {
+  command = plan
+
+  variables {
+    secrets = {
+      db = {}
+    }
+  }
+
+  expect_failures = [var.secrets]
+}
+
+run "test_duplicate_accessors_tolerated" {
+  command = plan
+
+  variables {
+    secrets = {
+      db = { value = "x", accessor_members = ["group:b@example.com", "group:b@example.com"] }
+    }
+  }
+
+  assert {
+    condition     = length(google_secret_manager_secret_iam_member.accessor) == 1
+    error_message = "Duplicate members collapse to one binding."
   }
 }
 

@@ -5,7 +5,9 @@ Secret Manager secrets from a map with optional initial versions, CMEK and acces
 ## Opinions
 
 - Secret ids are `<name>-<key>`; `name` is at most 40 characters and each key at most 20 (letters, digits, `_`, `-`).
-- A secret version is created only for keys that set `value`; keys without one create an empty secret to be populated out of band.
+- A secret version is created only when `create_version` (default true, plan-known) is set and a `value` is given; `create_version = true` with no value is rejected. Secrets with `create_version = false` are created empty, to be populated out of band. Removing the value or setting `create_version = false` destroys the module-managed version.
+- `id` is the contract alias of `secret_ids` (both map key to secret id).
+- An empty `replication_locations` list means automatic replication.
 - Replication is automatic unless `replication_locations` is set, which switches that secret to user-managed replicas.
 - `accessor_members` get `roles/secretmanager.secretAccessor` on that secret only, never project-wide.
 - Secret values are stored in Terraform state (plain `secret_data`, for the Terraform 1.5 floor). Protect the state backend, or leave `value` null and add versions out of band.
@@ -30,7 +32,7 @@ module "this" {
 
   secrets = {
     db_password = { value = var.db_password, accessor_members = ["serviceAccount:api@my-project.iam.gserviceaccount.com"] }
-    api_key     = {}
+    api_key     = { create_version = false }
   }
 }
 ```
@@ -71,7 +73,7 @@ No modules.
 | <a name="input_create"></a> [create](#input\_create) | Whether to create any resources. Set false to create nothing. | `bool` | `true` | no |
 | <a name="input_kms_key_name"></a> [kms\_key\_name](#input\_kms\_key\_name) | Customer-managed encryption key (projects/.../cryptoKeys/...) applied to every secret. For user-managed replication the key must be usable in every replica location. Null uses Google-managed encryption. | `string` | `null` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | Labels merged onto every secret, applied last. | `map(string)` | `{}` | no |
-| <a name="input_secrets"></a> [secrets](#input\_secrets) | Map of secret key to settings. value: initial secret version (null creates the secret without a version; the value is stored in Terraform state). replication\_locations: null means automatic replication, otherwise user-managed replicas in those locations. accessor\_members: IAM members granted roles/secretmanager.secretAccessor on that secret. Keys are at most 20 characters of letters, digits, underscore and hyphen. | <pre>map(object({<br/>    value                 = optional(string)<br/>    replication_locations = optional(list(string))<br/>    accessor_members      = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | Map of secret key to settings. value: initial secret version, stored in Terraform state. create\_version: plan-known switch (default true) for creating the version; set false for a secret without a version, and true requires a non-null value. replication\_locations: null or empty means automatic replication, otherwise user-managed replicas in those locations. accessor\_members: IAM members granted roles/secretmanager.secretAccessor on that secret. Keys are at most 20 characters of letters, digits, underscore and hyphen. | <pre>map(object({<br/>    value                 = optional(string)<br/>    create_version        = optional(bool, true)<br/>    replication_locations = optional(list(string))<br/>    accessor_members      = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
 
 ## Outputs
 

@@ -4,12 +4,12 @@ locals {
   # Keys and replication/accessor layout are not secret; only values are.
   secret_keys = var.create ? toset(nonsensitive(keys(var.secrets))) : toset([])
 
-  version_keys = toset([for k in local.secret_keys : k if nonsensitive(var.secrets[k].value != null)])
+  version_keys = toset([for k in local.secret_keys : k if nonsensitive(var.secrets[k].create_version)])
 
   accessor_pairs = {
     for p in flatten([
       for k in local.secret_keys : [
-        for m in nonsensitive(var.secrets[k].accessor_members) : { key = k, member = m }
+        for m in toset(nonsensitive(var.secrets[k].accessor_members)) : { key = k, member = m }
       ]
     ]) : "${p.key}/${p.member}" => p
   }
@@ -24,7 +24,7 @@ resource "google_secret_manager_secret" "this" {
 
   replication {
     dynamic "auto" {
-      for_each = nonsensitive(var.secrets[each.key].replication_locations) == null ? [1] : []
+      for_each = length(coalesce(nonsensitive(var.secrets[each.key].replication_locations), [])) == 0 ? [1] : []
       content {
         dynamic "customer_managed_encryption" {
           for_each = var.kms_key_name != null ? [1] : []
@@ -36,7 +36,7 @@ resource "google_secret_manager_secret" "this" {
     }
 
     dynamic "user_managed" {
-      for_each = nonsensitive(var.secrets[each.key].replication_locations) != null ? [1] : []
+      for_each = length(coalesce(nonsensitive(var.secrets[each.key].replication_locations), [])) > 0 ? [1] : []
       content {
         dynamic "replicas" {
           for_each = toset(nonsensitive(var.secrets[each.key].replication_locations))

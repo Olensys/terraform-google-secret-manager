@@ -36,14 +36,19 @@ variable "create" {
 }
 
 variable "secrets" {
-  description = "Map of secret key to settings. value: initial secret version (null creates the secret without a version; the value is stored in Terraform state). replication_locations: null means automatic replication, otherwise user-managed replicas in those locations. accessor_members: IAM members granted roles/secretmanager.secretAccessor on that secret. Keys are at most 20 characters of letters, digits, underscore and hyphen."
+  description = "Map of secret key to settings. value: initial secret version, stored in Terraform state. create_version: plan-known switch (default true) for creating the version; set false for a secret without a version, and true requires a non-null value. replication_locations: null or empty means automatic replication, otherwise user-managed replicas in those locations. accessor_members: IAM members granted roles/secretmanager.secretAccessor on that secret. Keys are at most 20 characters of letters, digits, underscore and hyphen."
   type = map(object({
     value                 = optional(string)
+    create_version        = optional(bool, true)
     replication_locations = optional(list(string))
     accessor_members      = optional(list(string), [])
   }))
   default   = {}
   sensitive = true
+  validation {
+    condition     = alltrue([for k, v in var.secrets : !v.create_version || v.value != null])
+    error_message = "Every secret with create_version = true must set a value; set create_version = false for secrets without one."
+  }
   validation {
     condition     = alltrue([for k in nonsensitive(keys(var.secrets)) : can(regex("^[a-zA-Z0-9_-]{1,20}$", k))])
     error_message = "Every key in secrets must match ^[a-zA-Z0-9_-]{1,20}$."

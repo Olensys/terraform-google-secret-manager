@@ -37,7 +37,7 @@ module "this" {
 
   secrets = {
     token = { value = "example-initial-value" }
-    empty = {}
+    empty = { create_version = false }
   }
 }
 
