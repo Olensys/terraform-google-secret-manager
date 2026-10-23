@@ -1,5 +1,7 @@
 locals {
-  labels = merge(var.context.extra_tags, var.labels)
+  extra_labels = { for k, v in var.context.extra_tags :
+  substr(replace(lower(k), "/[^a-z0-9_-]/", "-"), 0, 63) => substr(replace(lower(v), "/[^a-z0-9_-]/", "-"), 0, 63) }
+  labels = merge(local.extra_labels, var.labels)
 
   # Keys and replication/accessor layout are not secret; only values are.
   secret_keys = var.create ? toset(nonsensitive(keys(var.secrets))) : toset([])
