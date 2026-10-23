@@ -1,6 +1,6 @@
-# __NAME__
+# terraform-google-secret-manager
 
-__DESCRIPTION__
+Secret Manager secrets from a map with optional initial versions, CMEK and accessor IAM
 
 ## Opinions
 
@@ -10,7 +10,7 @@ __DESCRIPTION__
 
 ```hcl
 module "this" {
-  source = "git::https://github.com/Olensys/__NAME__.git?ref=v1.0.0"
+  source = "git::https://github.com/Olensys/terraform-google-secret-manager.git?ref=v1.0.0"
 
   name = "example"
   context = {
