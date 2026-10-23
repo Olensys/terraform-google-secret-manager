@@ -4,7 +4,7 @@ tier: capability          # primitive | capability | blueprint
 maturity: experimental    # experimental | stable | deprecated
 description: Secret Manager secrets from a map with optional initial versions, CMEK and accessor IAM
 owners: [platform]
-upstream: null            # e.g. "terraform-aws-modules/s3-bucket/aws 5.17.0"
-pairs_with: null          # e.g. "terraform-google-gcs-bucket"
+upstream: null
+pairs_with: terraform-aws-ssm-parameters
 registry_name: terraform-google-secret-manager
 deprecated: null          # { removal: YYYY-MM-DD, replacement: <repo> }
