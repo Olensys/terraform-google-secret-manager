@@ -1,7 +1,7 @@
 name: terraform-google-secret-manager
 cloud: google          # aws | google | common
 tier: capability          # primitive | capability | blueprint
-maturity: experimental    # experimental | stable | deprecated
+maturity: stable    # experimental | stable | deprecated
 description: Secret Manager secrets from a map with optional initial versions, CMEK and accessor IAM
 owners: [platform]
 upstream: null
