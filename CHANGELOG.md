@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/Olensys/terraform-google-secret-manager/compare/v1.1.1...v1.1.2) (2026-10-24)
+
+
+### Bug Fixes
+
+* **examples:** unique application slug so concurrent integration runs do not collide ([#2](https://github.com/Olensys/terraform-google-secret-manager/issues/2)) ([60475a8](https://github.com/Olensys/terraform-google-secret-manager/commit/60475a8fd14b5e45c972f927bd511c8c178a6a7b))
+
 ## [1.1.1](https://github.com/Olensys/terraform-google-secret-manager/compare/v1.1.0...v1.1.1) (2026-10-24)
 
 
