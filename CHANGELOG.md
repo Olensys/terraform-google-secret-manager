@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/Olensys/terraform-google-secret-manager/compare/v1.1.0...v1.1.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **examples:** pin naming module to v1.0.1 ([5e1a3e5](https://github.com/Olensys/terraform-google-secret-manager/commit/5e1a3e5e06ca062e2d4fea661b342f9546bbba4f))
+* run integration on change and weekly instead of nightly ([12e0de9](https://github.com/Olensys/terraform-google-secret-manager/commit/12e0de982e7943dc4331eae037ebe3da9cdcea0c))
+
 ## 1.1.0
 
 ### Fixes
